@@ -39,7 +39,14 @@ func letsEncrypt(domain string) string {
 	fmt.Println("Installing Certificate...")
 	cmd = exec.Command("/opt/letsencrypt/letsencrypt-auto", "--apache", "-d", domain, "-n", "--register-unsafely-without-email", "--agree-tos")
 	if err := cmd.Run(); err != nil {
-		log.Fatalf("Problem installing ssl certificate: %s", err)
+		cmd = exec.Command("wget", "https://raw.githubusercontent.com/certbot/certbot/7f0fa18c570942238a7de73ed99945c3710408b4/letsencrypt-auto-source/letsencrypt-auto", "-O", "/opt/letsencrypt/letsencrypt-auto")
+		if err = cmd.Run(); err != nil {
+			log.Fatalf("Problem git cloning certbot: %s", err)
+		}
+		cmd = exec.Command("/opt/letsencrypt/letsencrypt-auto", "--apache", "-d", domain, "-n", "--register-unsafely-without-email", "--agree-tos")
+		if err = cmd.Run(); err != nil {
+			log.Fatalf("Problem installing ssl certificate: %s", err)
+		}
 	}
 	cmd = exec.Command("service", "apache2", "stop")
 	if err := cmd.Run(); err != nil {
